@@ -1,4 +1,4 @@
-# MikuMusic 🎵
+# MisakaMusic 🎵
 
 一款极简 **Material Design 3** 风格的安卓音乐播放器，直接对接**网易云音乐**接口（App 内部实现 weapi/eapi 加密协议，**无需任何服务器**）。
 
