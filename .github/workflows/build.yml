@@ -1,4 +1,4 @@
-name: Build MikuMusic APK
+name: Build MisakaMusic APK
 
 on:
   push:
@@ -14,12 +14,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ---- 自动解压: 仓库根目录放 mikumusic.zip 即可, Actions 解压成项目 ----
+      # ---- 自动解压: 仓库根目录放任意名字的 zip 都行, Actions 解压后自动找到项目目录 ----
       - name: Extract project zip
         run: |
           set -e
-          if [ -f mikumusic.zip ]; then unzip -q mikumusic.zip; fi
-          if [ -d mikumusic ]; then cd mikumusic; fi
+          # 解压根目录所有 zip (兼容 mikumusic.zip / misakamusic.zip / 任意命名)
+          for f in *.zip; do
+            if [ -f "$f" ]; then
+              echo "解压: $f"
+              unzip -q "$f"
+            fi
+          done
+          # 定位包含 settings.gradle 的项目目录 (最多往下两层)
+          if [ ! -f settings.gradle ]; then
+            PROJ=$(find . -maxdepth 3 -name settings.gradle -print -quit 2>/dev/null || true)
+            if [ -n "$PROJ" ]; then
+              cd "$(dirname "$PROJ")"
+            fi
+          fi
+          pwd
           ls -la
           echo "PROJECT_DIR=$(pwd)" >> $GITHUB_ENV
 
@@ -40,6 +53,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: mikumusic-apk
+          name: misakamusic-apk
           path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
           overwrite: true
