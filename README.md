@@ -10,8 +10,6 @@ App 内部实现网易云 weapi / eapi 加密协议，**无需任何服务器**�
 
 ### 登录
 - Cookie 登录（推荐，从浏览器复制 MUSIC_U 即可）
-- 扫码登录（网易云音乐 App 扫码确认）
-- 手机号 + 短信验证码登录
 
 ### 歌单与搜索
 - 我喜欢的音乐、我的全部歌单
@@ -42,13 +40,12 @@ App 内部实现网易云 weapi / eapi 加密协议，**无需任何服务器**�
 | 后台 | MediaSessionService + 前台通知 |
 | 网络 | OkHttp + 自实现 weapi / eapi 加密 |
 | 图片 | Glide + Palette 取色 |
-| 二维码 | ZXing |
 | 异步 | Kotlin Coroutines |
 
 ## 系统要求
 
 - Android 6.0（API 23）及以上
-- 无需 root，无需额外权限（除通知权限用于后台播放）
+- 无需额外权限（除通知权限用于后台播放）
 
 ## 构建
 
