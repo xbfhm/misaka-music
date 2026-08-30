@@ -22,7 +22,7 @@ jobs:
           for f in *.zip *.Zip *.ZIP; do
             if [ -f "$f" ]; then
               echo "解压: $f"
-              unzip -q "$f"
+              unzip -q -o "$f"
             fi
           done
           # 定位包含 settings.gradle 的项目目录 (最多往下三层, 兼容嵌套/大小写不同的目录名)
