@@ -1,26 +1,41 @@
 # 更新日志 CHANGELOG
 
-## [v3.1.1] - 2026-09-19（修复 v3.1 启动闪退 + 构建失败）
+## [v3.1.2] - 2026-09-19（修复启动闪退的**真正根因**）
 
-### 🐛 修复「安装后点击图标直接闪退」
+### 🐛 修复「点击图标直接闪退」
 
-- **根因**：v3.1 把主题的 `android:windowBackground` 改成了 `?attr/colorSurface`（颜色 attr）。该属性期望 **drawable** 类型，写法偏离 Material 官方规范（官方用 `?android:attr/colorBackground`），在部分 ROM 上导致窗口创建失败 → 启动闪退。
-- **修复**：
-  - `android:windowBackground` / `android:colorBackground` / `android:statusBarColor` 全部回退为具体颜色 `@color/namida_surface`
-  - 10 处页面根布局背景同步回退为 `@color/namida_surface`
-  - `BaseActivity` 恢复显式设置状态栏颜色
-- **保留**：底部导航栏 `NavigationBarView`（Material 3）、`MaterialButton`、`TextInputEditText` 等 Material 组件改造不受影响。
+新加入的崩溃详情页给出了确切堆栈：
+
+```
+java.lang.NoSuchMethodException:
+com.google.android.material.navigation.NavigationBarView.<init>
+[class android.content.Context, interface android.util.AttributeSet]
+```
+
+- **根因**：`com.google.android.material.navigation.NavigationBarView` 是 Material 中的**抽象基类**（只提供 4 参数构造函数），**不能写在 XML 里 inflate**。AAPT2 不校验这一点，所以构建能通过，但一启动就抛 `InflateException`。
+- **修复**：改用具体实现类 **`com.google.android.material.bottomnavigation.BottomNavigationView`** —— 这正是 Material Design 3 规范中「Navigation bar」的官方实现，继承自 `NavigationBarView`，`app:menu` / `itemIconTint` / `itemTextColor` / `labelVisibilityMode` 等属性完全通用，`MainActivity` 无需改动。
+
+### 🔧 本地校验能力增强（防止同类问题再发生）
+
+- 资源校验器新增 **View 类检查**：校验 XML 中的自定义 View 是否为**非抽象类**、且具备 `public (Context, AttributeSet)` 构造函数。
+- 这类错误 AAPT2 完全不检查（只会在运行时崩溃），现已能在本地拦截。
+
+---
+
+## [v3.1.1] - 2026-09-19（修复构建失败 + 增强崩溃可诊断性）
 
 ### 🐛 修复「云端构建失败」
 
 - `activity_log.xml` 中 `insetTop` / `insetBottom` 曾被误改为 `app:` 命名空间，AAPT2 报 `attribute insetBottom not found`。
 - 这两个是 **Android 框架属性**，已改回 `android:` 命名空间。
 
-### 🛡 增强健壮性与可诊断性
+### 🛡 预防性回退 + 崩溃可诊断性
 
-- Material You 动态取色初始化加 `try-catch` 兜底，个别 ROM 异常时自动降级，不影响启动。
-- 崩溃堆栈自动写入外部文件：`Android/data/com.xbfhm.misakamusic/files/crash.log`。
+- 将主题 `windowBackground` / `colorBackground` / `statusBarColor` 及 10 处页面根背景回退为具体颜色（颜色 attr 用在不期望 drawable 的系统属性上存在兼容风险）。
+  > 说明：事后证明**闪退并非此项引起**（真凶见 v3.1.2 的 NavigationBarView 抽象类问题），此回退作为兼容性保险保留。
 - **新增崩溃详情页**：出错时自动弹出并显示堆栈（系统主题 + 纯代码 UI，不依赖自定义资源），只有手机时可直接截图反馈。
+- 崩溃堆栈同时写入 `Android/data/com.xbfhm.misakamusic/files/crash.log`。
+- `DynamicColors` 初始化加 `try-catch` 兜底。
 
 ---
 
