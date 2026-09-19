@@ -1,5 +1,27 @@
 # 更新日志 CHANGELOG
 
+## [v3.1.1] - 2026-09-19（修复 v3.1 启动闪退）
+
+### 🐛 修复「安装后点击图标直接闪退」
+
+- **根因**：v3.1 把主题的 `android:windowBackground` 改成了 `?attr/colorSurface`（颜色 attr）。该属性期望 **drawable** 类型，写法偏离 Material 官方规范（官方用 `?android:attr/colorBackground`），在部分 ROM 上导致窗口创建失败 → 启动闪退。
+- **修复**：
+  - `android:windowBackground` / `android:colorBackground` / `android:statusBarColor` 全部回退为具体颜色 `@color/namida_surface`
+  - 10 处页面根布局背景同步回退为 `@color/namida_surface`
+  - `BaseActivity` 恢复显式设置状态栏颜色
+- **保留**：底部导航栏 `NavigationBarView`（Material 3）、`MaterialButton`、`TextInputEditText` 等 Material 组件改造不受影响。
+
+### 🛡 增强健壮性
+
+- Material You 动态取色初始化加 `try-catch` 兜底，个别 ROM 异常时自动降级，不影响启动。
+- 崩溃堆栈自动写入外部文件 `Android/data/com.xbfhm.misakamusic/files/crash.log`，便于无电脑时排查。
+
+### 🔧 修正
+
+- `activity_log.xml` 的 `insetTop` / `insetBottom` 由 `android:` 改为 `app:` 命名空间（MaterialButton 自定义属性）。
+
+---
+
 ## [v3.1] - 2026-09-19（第十四轮：改用 Material Design + 启用 Material You）
 
 ### 🎨 底部导航栏改用 Material 3 标准组件
