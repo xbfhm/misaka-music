@@ -1,6 +1,6 @@
 # 更新日志 CHANGELOG
 
-## [v3.1.1] - 2026-09-19（修复 v3.1 启动闪退）
+## [v3.1.1] - 2026-09-19（修复 v3.1 启动闪退 + 构建失败）
 
 ### 🐛 修复「安装后点击图标直接闪退」
 
@@ -11,14 +11,16 @@
   - `BaseActivity` 恢复显式设置状态栏颜色
 - **保留**：底部导航栏 `NavigationBarView`（Material 3）、`MaterialButton`、`TextInputEditText` 等 Material 组件改造不受影响。
 
-### 🛡 增强健壮性
+### 🐛 修复「云端构建失败」
+
+- `activity_log.xml` 中 `insetTop` / `insetBottom` 曾被误改为 `app:` 命名空间，AAPT2 报 `attribute insetBottom not found`。
+- 这两个是 **Android 框架属性**，已改回 `android:` 命名空间。
+
+### 🛡 增强健壮性与可诊断性
 
 - Material You 动态取色初始化加 `try-catch` 兜底，个别 ROM 异常时自动降级，不影响启动。
-- 崩溃堆栈自动写入外部文件 `Android/data/com.xbfhm.misakamusic/files/crash.log`，便于无电脑时排查。
-
-### 🔧 修正
-
-- `activity_log.xml` 的 `insetTop` / `insetBottom` 由 `android:` 改为 `app:` 命名空间（MaterialButton 自定义属性）。
+- 崩溃堆栈自动写入外部文件：`Android/data/com.xbfhm.misakamusic/files/crash.log`。
+- **新增崩溃详情页**：出错时自动弹出并显示堆栈（系统主题 + 纯代码 UI，不依赖自定义资源），只有手机时可直接截图反馈。
 
 ---
 
