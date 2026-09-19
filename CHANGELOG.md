@@ -1,5 +1,28 @@
 # 更新日志 CHANGELOG
 
+## [v3.1] - 2026-09-19（第十四轮：改用 Material Design + 启用 Material You）
+
+### 🎨 底部导航栏改用 Material 3 标准组件
+- 原手写的 `LinearLayout` + `ImageView` + `TextView` 导航栏，替换为官方 `NavigationBarView` + `@menu/menu_bottom_nav`
+- 获得标准的 M3 选中指示器、涟漪反馈与切换动画
+- 图标/文字着色改用 `@color/nav_item_tint` selector（选中亮色 / 未选中暗灰），保持原有明暗对比设计
+
+### 🧩 控件 Material 化
+- 日志页 2 个原生 `Button` → `MaterialButton`
+- 搜索框原生 `EditText` → `TextInputEditText`
+
+### 🌈 启用 Material You 动态取色
+- 启动时调用 `DynamicColors.applyToActivitiesIfAvailable()`，Android 12+ 自动跟随系统壁纸取色
+- 主题 `android:windowBackground` / `android:colorBackground` / `android:statusBarColor` 改为 `?attr/colorSurface`
+- 10 处页面根布局背景由硬编码色改为 `?attr/colorSurface`，背景随主题联动
+- Android 12 以下自动回退原有配色，视觉不变
+
+### ✅ 保持不变
+- UI 框架与布局结构完全未动
+- 封面圆角、卡片、封面动态取色（封面 → 进度条/播放键）等设计保持原样
+
+---
+
 ## [v3.0] - 2026-08-29（第十三轮：修复切歌无响应 + 播放引擎重写）
 
 ### 🐛 修复「播放歌单点下一首没反应」
