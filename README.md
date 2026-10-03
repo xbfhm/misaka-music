@@ -85,6 +85,10 @@ gradle assembleDebug
 
 APK 输出：`app/build/outputs/apk/debug/app-debug.apk`
 
+> 仓库内自带固定密钥库 `app/misaka-release.jks`（alias `misaka`），debug / release 都用它签名，
+> 因此**每次构建出来的 APK 签名一致，新版本可以直接覆盖安装**，不需要先卸载旧版本。
+> 该密钥仅用于个人项目签名，请勿用于正式上架。
+
 ## 📁 项目结构
 
 ```
