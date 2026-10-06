@@ -55,7 +55,24 @@ jobs:
           gradle-version: '8.5'
 
       - name: Build debug APK
-        run: gradle -p "$PROJECT_DIR" assembleDebug --no-daemon --stacktrace
+        id: build
+        run: |
+          set -o pipefail
+          gradle -p "$PROJECT_DIR" assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+
+      # 失败时把构建日志推到 ci-log 分支, 这样在没有电脑/没有 token 的情况下
+      # 也能通过 GitHub contents API 读到真正的报错。
+      - name: Publish build log (on failure)
+        if: failure()
+        run: |
+          set -e
+          tail -c 80000 build.log > ci-log.txt || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B ci-log
+          git add -f ci-log.txt
+          git commit -m "ci: build log [skip ci]" || true
+          git push -f origin ci-log
 
       - name: Rename APK
         run: |
