@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,6 +38,10 @@ jobs:
           pwd
           ls -la
           echo "PROJECT_DIR=$(pwd)" >> $GITHUB_ENV
+          # 版本号从 build.gradle 里读出来, 供后面重命名 APK / 建 Release 使用
+          VER=$(grep -oE 'versionName\s+"[^"]+"' "$(pwd)/app/build.gradle" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "APP_VERSION=${VER:-dev}" >> $GITHUB_ENV
+          echo "版本: ${VER:-dev}"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -50,9 +57,30 @@ jobs:
       - name: Build debug APK
         run: gradle -p "$PROJECT_DIR" assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
+      - name: Rename APK
+        run: |
+          mkdir -p out
+          cp "$PROJECT_DIR"/app/build/outputs/apk/debug/*.apk "out/MisakaMusic_${APP_VERSION}.apk"
+          ls -la out
+
+      - name: Upload APK (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: misakamusic-apk
-          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
+          path: out/*.apk
           overwrite: true
+
+      # ---- 同时发布到 Releases: 免登录直接下载, 方便手机上装 ----
+      - name: Publish to Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.APP_VERSION }}
+          name: MisakaMusic v${{ env.APP_VERSION }}
+          body: |
+            自动构建产物（v${{ env.APP_VERSION }}）。
+
+            直接下载下面的 APK 安装即可（已用固定密钥签名，可直接覆盖安装旧版本）。
+          files: out/*.apk
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
