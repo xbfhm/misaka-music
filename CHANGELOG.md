@@ -1,5 +1,16 @@
 # 更新日志 CHANGELOG
 
+## [v3.9.1] - 2026-10-24（修复: 部分 ROM 上启动闪退）
+
+### 🐛 紧急修复
+- **启动崩溃** (`NoSuchMethodException: GlassNavBackground.<init> []`):
+  realme/ColorOS 等 ROM 的 DrawableInflater 会调用自定义 Drawable 的**无参构造函数**,
+  原实现只有 (Context) / (Context, AttributeSet) → 主界面 inflate 直接崩。
+- 修复: GlassNavBackground 补齐 4 个构造函数 (无参 / Context / Context+AttributeSet /
+  Context+AttributeSet+Theme), 无参路径在首次 draw() 时用系统 density 兜底初始化,
+  任何 ROM 都能正常加载彩虹玻璃导航。
+- versionCode 15 / versionName 3.9.1。
+
 ## [v3.9.0] - 2026-10-24（液态玻璃导航重构 + 网易云听歌时长真正同步）
 
 ### 🧊 液态玻璃导航 (移动端 Liquid Glass)
